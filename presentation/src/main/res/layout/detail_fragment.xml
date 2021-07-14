@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <ImageView
+        android:id="@+id/poster"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/inception"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/detail_bg">
+
+        <LinearLayout
+            android:id="@+id/title_wrapper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="80dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/title_guide"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                tools:text="Inception" />
+
+            <TextView
+                android:id="@+id/year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                tools:text="2009" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/title_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="100dp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintStart_toStartOf="@id/title_guide"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/ic_play_button"/>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/second_row_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="200dp" />
+        <LinearLayout
+            android:id="@+id/second_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintTop_toBottomOf="@id/second_row_guide">
+            <LinearLayout
+                android:layout_weight="3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:text="Genre"
+                    android:textColor="@color/sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/genre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+
+                    tools:text="Action, Adventure, Thriller, fantasy, mystey, animation"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+                <TextView
+                    android:text="Genre"
+                    android:textColor="@color/sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    tools:text="2h19m"
+                    android:textColor="@color/white"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_marginStart="16dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:text="Rating"
+                    android:textColor="@color/sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/imdb_rating"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="8.7"
+                    android:textColor="@color/white"
+                    android:drawablePadding="4dp"
+                    android:drawableStart="@drawable/ic_star"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/plot_sub"
+            android:layout_width="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintTop_toBottomOf="@id/second_row"
+            app:layout_constraintStart_toStartOf="parent"
+
+            android:text="Synopsis"
+            android:textColor="@color/sub"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/plot"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintTop_toBottomOf="@id/plot_sub"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            tools:text="Synopsis Synopsis Synopsis Synopsis Synopsis Synopsis
+                Synopsis Synopsis Synopsis Synopsis Synopsis Synopsis
+                Synopsis Synopsis Synopsis Synopsis Synopsis dsadsddsdsdds
+                "
+            android:textColor="@color/white"
+            android:maxLines="5"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/director_block"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toBottomOf="@id/plot"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="60dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:text="Director"
+                android:textColor="@color/sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/director"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="8.7"
+                android:paddingStart="20dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/writer_block"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toBottomOf="@id/director_block"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:text="Writer"
+                android:textColor="@color/sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/writer"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="8.7"
+                android:paddingStart="32dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/actor_block"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toBottomOf="@id/writer_block"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:text="Actors"
+                android:textColor="@color/sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/actors"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                tools:text="Brad Pitt"
+                android:paddingStart="30dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/add_favorite"
+            android:layout_width="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="60dp"
+            android:layout_marginHorizontal="20dp"
+            android:text="Add to favorite"
+            android:theme="@style/App.YellowAccent"
+            android:layout_height="50dp"/>
+        <ProgressBar
+            android:id="@+id/indeterminateBar"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            style="?android:attr/progressBarStyleLarge"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:theme="@style/App.YellowAccent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</FrameLayout>
