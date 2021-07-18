@@ -2,10 +2,12 @@ package com.balv.imdb.ui.detail;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.balv.imdb.data.mapper.Mapper;
 import com.balv.imdb.domain.models.ApiResult;
 import com.balv.imdb.domain.models.Movie;
 import com.balv.imdb.domain.repositories.IMovieRepository;
@@ -15,7 +17,10 @@ import com.balv.imdb.domain.usecases.GetMovieDetailUseCase;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.ObservableSource;
+import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
@@ -55,13 +60,12 @@ public class DetailFragmentViewModel extends ViewModel {
     public void setup(String imdbId) {
         disposable.add(getMovieDetailUseCase.execute(imdbId)
                 .subscribeOn(Schedulers.io())
-                .map(movie -> {
+                .doOnNext(movie -> {
                     if (TextUtils.isEmpty(movie.getImdbRated())) {
                         disposable.add(getDetailFromNetwork.execute(imdbId)
                                 .subscribeOn(Schedulers.io())
                                 .subscribe(apiResult::postValue));
                     }
-                    return movie;
                 })
                 .subscribe(getMovieData::postValue));
     }

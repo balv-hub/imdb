@@ -16,13 +16,6 @@ public class GetMovieDetailUseCase extends BaseUseCase<String, Movie> {
 
     @Override
     public Observable<Movie> execute(String id) {
-        mMovieRepo.getDetailFromNetwork(id);
         return mMovieRepo.getMovieDetail(id);
-/*                .map(movie -> {
-                    if (movie.getImdbRated() == null || movie.getImdbRated().isEmpty()) {
-                        mMovieRepo.getDetailFromNetwork(id);
-                    }
-                    return movie;
-                })*/
     }
 }
