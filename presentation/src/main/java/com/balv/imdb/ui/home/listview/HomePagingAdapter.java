@@ -70,11 +70,6 @@ public class HomePagingAdapter extends PagingDataAdapter<Movie, HomePagingAdapte
     }
 
 
-//    @Override
-//    public int getItemCount() {
-//        return mMovieList.size();
-//    }
-
     class ItemViewHolder extends RecyclerView.ViewHolder {
         View view;
         TextView title;
