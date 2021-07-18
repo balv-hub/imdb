@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.paging.LoadStateAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +27,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import kotlin.Unit;
 
 
 @AndroidEntryPoint
@@ -56,7 +54,7 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
         mNavController = NavHostFragment.findNavController(this);
         mViewModel = new ViewModelProvider(this).get(HomeFragmentViewModel.class);
 
-        mViewModel.setupPaging();
+        mViewModel.setup();
 
         setupListView();
         mAlertDialog = new MaterialAlertDialogBuilder(getContext()).setTitle("Error").create();
@@ -79,7 +77,7 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
         LoadingPagingAdapter loadStateAdapter = new LoadingPagingAdapter();
         mAdapter.withLoadStateFooter(loadStateAdapter);
 
-        mViewModel.observerMainListData().observe(
+        mViewModel.getListLiveData().observe(
                 getViewLifecycleOwner(),
                 list -> {
                     Log.i(TAG, "onViewCreated: " + list.size());

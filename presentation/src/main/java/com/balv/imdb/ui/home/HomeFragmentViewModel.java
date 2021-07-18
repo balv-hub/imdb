@@ -12,6 +12,7 @@ import com.balv.imdb.domain.models.ApiResult;
 import com.balv.imdb.domain.models.Movie;
 import com.balv.imdb.domain.repositories.IMovieRepository;
 import com.balv.imdb.domain.usecases.GetMovieDetailUseCase;
+import com.balv.imdb.domain.usecases.GetMovieListUseCase;
 import com.balv.imdb.domain.usecases.GetNextMoviePageUseCase;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
+import kotlin.Unit;
 
 @HiltViewModel
 public class HomeFragmentViewModel extends ViewModel {
@@ -33,21 +35,23 @@ public class HomeFragmentViewModel extends ViewModel {
     GetNextMoviePageUseCase getNextMoviePageUseCase;
 
     @Inject
-    GetMovieDetailUseCase getMovieDetailUseCase;
+    GetMovieListUseCase getMovieListUseCase;
 
-    private MutableLiveData<ApiResult> apiError = new MutableLiveData<>();
-    private MutableLiveData<PagingData<Movie>> pagingDataLiveData = new MutableLiveData<>();
-    public MutableLiveData<ApiResult> getErrorLiveData(){
+
+
+    private final MutableLiveData<ApiResult> apiError = new MutableLiveData<>();
+    private final MutableLiveData<List<Movie>> listMovieData = new MutableLiveData<>();
+    private final MutableLiveData<PagingData<Movie>> pagingDataLiveData = new MutableLiveData<>();
+
+    public MutableLiveData<ApiResult> getErrorLiveData() {
         return apiError;
     }
-    public MutableLiveData<PagingData<Movie>> getPagingLiveData(){
+
+    public MutableLiveData<PagingData<Movie>> getPagingLiveData() {
         return pagingDataLiveData;
     }
 
-    private MutableLiveData<Boolean> showMore = new MutableLiveData<>();
-    public MutableLiveData<Boolean> getShowMore(){
-        return showMore;
-    }
+    private final MutableLiveData<Boolean> showMore = new MutableLiveData<>();
 
 
     @Inject
@@ -63,20 +67,20 @@ public class HomeFragmentViewModel extends ViewModel {
                     Log.i("TAG", "getGetNextMoviePage: " + page);
                     disposable.add(
                             getNextMoviePageUseCase.execute((int) Math.round(page))
-                                    .subscribe( t -> {
-                                        if (t.isSuccess()) {
-                                            showMore.postValue(true);
-                                        }
-                                        apiError.postValue(t);
-                                    }
-                            )
+                                    .subscribe(t -> {
+                                                if (t.isSuccess()) {
+                                                    showMore.postValue(true);
+                                                }
+                                                apiError.postValue(t);
+                                            }
+                                    )
                     );
                 }, Throwable::printStackTrace));
 
     }
 
-    public LiveData<List<Movie>> observerMainListData() {
-        return movieRepository.getLocalMovieData();
+    public LiveData<List<Movie>> getListLiveData() {
+        return listMovieData;
     }
 
     @Override
@@ -85,13 +89,19 @@ public class HomeFragmentViewModel extends ViewModel {
         super.onCleared();
     }
 
-    public void setupPaging() {
+    public void setup() {
         disposable.add(
                 movieRepository.getPagingData()
                         .subscribeOn(Schedulers.io())
-                        .subscribe(pagingData -> {
-                            pagingDataLiveData.postValue(pagingData);
-                        }, Throwable::printStackTrace)
+                        .subscribe(
+                                pagingDataLiveData::postValue,
+                                Throwable::printStackTrace
+                        )
+        );
+
+        disposable.add(
+                getMovieListUseCase.execute(Unit.INSTANCE)
+                        .subscribe(listMovieData::postValue, Throwable::printStackTrace)
         );
     }
 }

@@ -11,11 +11,10 @@ import java.util.List;
 import io.reactivex.Observable;
 
 public interface IMovieRepository {
-    LiveData<List<Movie>> getLocalMovieData();
-    LiveData<Movie> getMovieDetail(String id);
+    Observable<List<Movie>> getLocalMovieData();
+    Observable<Movie> getMovieDetail(String id);
     Observable<ApiResult> getDetailFromNetwork(String id);
     Observable<ApiResult> getNextRemoteDataPage(int page);
-    boolean initialized();
     int getCurrentDataSize();
     long getDataRefreshDate();
     void setDataRefreshDate(long time);

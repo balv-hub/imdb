@@ -45,12 +45,15 @@ public class DetailFragment extends Fragment {
 
         mViewModel = new ViewModelProvider(this).get(DetailFragmentViewModel.class);
         String movieId = DetailFragmentArgs.fromBundle(getArguments()).getMovieId();
+        mViewModel.setup(movieId);
         mViewModel.getMovieDetail(movieId).observe(getViewLifecycleOwner(), movie -> bind(movie));
         mViewModel.getErrorLiveData().observe(
                 getViewLifecycleOwner(),
-                errorResult -> {
-                    mAlertDialog.setMessage("Something happened, check API key or network condition");
-                    mAlertDialog.show();
+                apiResult -> {
+                    if (!apiResult.isSuccess()) {
+                        mAlertDialog.setMessage("Something happened, check API key or network condition");
+                        mAlertDialog.show();
+                    }
                 });
 
     }

@@ -15,10 +15,12 @@ import com.balv.imdb.data.model.MovieEntity;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+
 @Dao
 public abstract class MovieDao {
     @Query("SELECT * FROM movies")
-    public abstract LiveData<List<MovieEntity>> getMainMovieList();
+    public abstract Observable<List<MovieEntity>> getMainMovieList();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void insertAll(List<MovieEntity> movieEntities);
@@ -27,7 +29,7 @@ public abstract class MovieDao {
     public abstract void updateMovies(MovieEntity... movieEntities);
 
     @Query("SELECT * FROM movies WHERE id = :id")
-    public abstract LiveData<MovieEntity> getMovieLiveData(String id);
+    public abstract Observable<MovieEntity> setMovieDetailSource(String id);
 
     @Delete
     public abstract void deleteItem(MovieEntity... ids);

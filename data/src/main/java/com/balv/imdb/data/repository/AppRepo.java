@@ -4,17 +4,13 @@ import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Transformations;
 import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
 import androidx.paging.PagingData;
 import androidx.paging.PagingDataTransforms;
-import androidx.paging.PagingLiveData;
 import androidx.paging.rxjava2.PagingRx;
 
 import com.balv.imdb.data.Constant;
-import com.balv.imdb.data.executor.CurrentThreadExecutor;
 import com.balv.imdb.data.executor.PagingExecutor;
 import com.balv.imdb.data.local.AppDb;
 import com.balv.imdb.data.local.UserPreference;
@@ -29,12 +25,12 @@ import com.balv.imdb.domain.repositories.IMovieRepository;
 
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.HttpException;
 
@@ -65,23 +61,18 @@ public class AppRepo implements IMovieRepository {
     }
 
     @Override
-    public LiveData<List<Movie>> getLocalMovieData() {
-        return Transformations.map(mAppDb.movieDao().getMainMovieList(),
-                list -> list.stream()
+    public Observable<List<Movie>> getLocalMovieData() {
+        return mAppDb.movieDao().getMainMovieList().map(list ->
+                list.stream()
                         .map(movieEntity -> mapper.entityToDomain(movieEntity))
                         .collect(Collectors.toList()));
+
     }
 
     @Override
-    public LiveData<Movie> getMovieDetail(String id) {
-        return Transformations.map(mAppDb.movieDao().getMovieLiveData(id),
-                movie -> {
-                    if (TextUtils.isEmpty(movie.imdbRated)) {
-                        getDetailFromNetwork(id);
-                    }
-                    return mapper.entityToDomain(movie);
-                }
-        );
+    public Observable<Movie> getMovieDetail(String id) {
+        return mAppDb.movieDao().setMovieDetailSource(id)
+                .map(mapper::entityToDomain);
     }
 
     public static final Executor EXECUTOR = new PagingExecutor (CORE_POOL_SIZE, MAXIMUM_POOL_SIZE);
@@ -117,10 +108,6 @@ public class AppRepo implements IMovieRepository {
                 });
     }
 
-    @Override
-    public boolean initialized() {
-        return mUserPref.getBooleanValue(Constant.INITIALIZED);
-    }
 
     @Override
     public int getCurrentDataSize() {

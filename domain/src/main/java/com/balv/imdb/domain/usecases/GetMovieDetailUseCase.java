@@ -1,22 +1,28 @@
 package com.balv.imdb.domain.usecases;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
-import androidx.lifecycle.LiveData;
 
 import com.balv.imdb.domain.models.Movie;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+
 @SuppressLint("CheckResult")
-public class GetMovieDetailUseCase extends BaseUseCase {
+public class GetMovieDetailUseCase extends BaseUseCase<String, Movie> {
     @Inject
     public GetMovieDetailUseCase(){}
 
-    public LiveData<Movie> getMovieDetail(String id) {
-        Log.i("TAG", "getMovieDetail: " + id);
+    @Override
+    public Observable<Movie> execute(String id) {
         mMovieRepo.getDetailFromNetwork(id);
         return mMovieRepo.getMovieDetail(id);
+/*                .map(movie -> {
+                    if (movie.getImdbRated() == null || movie.getImdbRated().isEmpty()) {
+                        mMovieRepo.getDetailFromNetwork(id);
+                    }
+                    return movie;
+                })*/
     }
 }

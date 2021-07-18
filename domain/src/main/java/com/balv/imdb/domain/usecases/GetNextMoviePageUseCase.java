@@ -7,12 +7,13 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 
-public class GetNextMoviePageUseCase extends BaseUseCase {
+public class GetNextMoviePageUseCase extends BaseUseCase<Integer, ApiResult> {
 
     @Inject
     public GetNextMoviePageUseCase(){};
 
-    public Observable<ApiResult> execute(int page){
+    @Override
+    public Observable<ApiResult> execute(Integer page){
         return mMovieRepo.getNextRemoteDataPage(page);
     }
 }
