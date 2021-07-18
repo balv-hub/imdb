@@ -25,4 +25,12 @@ public class UserPreference {
     public boolean getBooleanValue(String tag) {
         return sharedPreferences.getBoolean(tag, false);
     }
+
+    public void saveLongValue(String tag, long value) {
+        sharedPreferences.edit().putLong(tag, value).apply();
+    }
+
+    public long getLongValue(String tag) {
+        return sharedPreferences.getLong(tag, 0);
+    }
 }

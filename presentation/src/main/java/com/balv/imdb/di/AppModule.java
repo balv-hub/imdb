@@ -8,6 +8,7 @@ import androidx.room.Room;
 
 import com.balv.imdb.data.Constant;
 import com.balv.imdb.data.local.AppDb;
+import com.balv.imdb.data.local.UserPreference;
 import com.balv.imdb.data.mapper.Mapper;
 import com.balv.imdb.data.network.ApiService;
 import com.balv.imdb.data.repository.AppRepo;
@@ -70,7 +71,8 @@ public class AppModule {
     }
     @Provides
     @Singleton
-    IMovieRepository providesMovieRepository(AppDb db, ApiService apiService, Mapper mapper) {
-        return new AppRepo(db, apiService, mapper);
+    IMovieRepository providesMovieRepository(AppDb db, ApiService apiService,
+                                             Mapper mapper, UserPreference userPreference) {
+        return new AppRepo(db, apiService, mapper, userPreference);
     }
 }

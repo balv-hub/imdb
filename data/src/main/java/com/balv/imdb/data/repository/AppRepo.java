@@ -6,11 +6,20 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import androidx.paging.Pager;
+import androidx.paging.PagingConfig;
+import androidx.paging.PagingData;
+import androidx.paging.PagingDataTransforms;
+import androidx.paging.PagingLiveData;
+import androidx.paging.rxjava2.PagingRx;
 
 import com.balv.imdb.data.Constant;
+import com.balv.imdb.data.executor.CurrentThreadExecutor;
+import com.balv.imdb.data.executor.PagingExecutor;
 import com.balv.imdb.data.local.AppDb;
 import com.balv.imdb.data.local.UserPreference;
 import com.balv.imdb.data.mapper.Mapper;
+import com.balv.imdb.data.mediator.PageKeyedRemoteMediator;
 import com.balv.imdb.data.model.MovieEntity;
 import com.balv.imdb.data.network.ApiService;
 import com.balv.imdb.domain.models.ApiResult;
@@ -19,6 +28,8 @@ import com.balv.imdb.domain.models.Movie;
 import com.balv.imdb.domain.repositories.IMovieRepository;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -35,6 +46,10 @@ public class AppRepo implements IMovieRepository {
 
     public ApiService mApiService;
 
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4));
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2;
+
     @Inject
     Mapper mapper;
 
@@ -42,10 +57,11 @@ public class AppRepo implements IMovieRepository {
     UserPreference mUserPref;
 
     @Inject
-    public AppRepo(AppDb mAppDb, ApiService mApiService, Mapper nwToDbMapper) {
+    public AppRepo(AppDb mAppDb, ApiService mApiService, Mapper nwToDbMapper, UserPreference preference) {
         this.mapper = nwToDbMapper;
         this.mAppDb = mAppDb;
         this.mApiService = mApiService;
+        this.mUserPref = preference;
     }
 
     @Override
@@ -68,6 +84,7 @@ public class AppRepo implements IMovieRepository {
         );
     }
 
+    public static final Executor EXECUTOR = new PagingExecutor (CORE_POOL_SIZE, MAXIMUM_POOL_SIZE);
     @Override
     public Observable<ApiResult> getDetailFromNetwork(String id) {
         return mApiService.getMovieDetail(Constant.API_KEY, id)
@@ -87,7 +104,7 @@ public class AppRepo implements IMovieRepository {
                     List<MovieEntity> entityList = result.list.stream()
                             .map(networkObject -> mapper.networkToEntity(networkObject))
                             .collect(Collectors.toList());
-                    mAppDb.movieDao().insertAllMovies(entityList);
+                    mAppDb.movieDao().insertAll(entityList);
 
                     return new ApiResult(result);
                 })
@@ -108,6 +125,30 @@ public class AppRepo implements IMovieRepository {
     @Override
     public int getCurrentDataSize() {
         return mAppDb.movieDao().getCount();
+    }
+
+    @Override
+    public long getDataRefreshDate() {
+        return mUserPref.getLongValue(Constant.DATA_REFRESH);
+    }
+
+    @Override
+    public void setDataRefreshDate(long time) {
+        mUserPref.saveLongValue(Constant.DATA_REFRESH, time);
+    }
+
+    @Override
+    public Observable<PagingData<Movie>> getPagingData(  ) {
+        PagingConfig config = new PagingConfig(10, 10,
+                true, 10, 200);
+        Pager<Integer, MovieEntity> pager = new Pager(config, 1,
+                new PageKeyedRemoteMediator(this, mAppDb, mApiService, mapper),
+                () -> mAppDb.movieDao().pagingSource());
+
+        Observable<PagingData<Movie>> pagingDataObservable = PagingRx.getObservable(pager)
+                .map(paging -> PagingDataTransforms.map(paging, EXECUTOR, mapper::entityToDomain));
+        return pagingDataObservable;
+
     }
 
 

@@ -13,19 +13,22 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.paging.LoadStateAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.balv.imdb.R;
 import com.balv.imdb.databinding.HomeFragmentBinding;
 import com.balv.imdb.ui.home.listener.IHomeItemClickListener;
-import com.balv.imdb.ui.home.listview.HomeAdapter;
+import com.balv.imdb.ui.home.listview.HomePagingAdapter;
+import com.balv.imdb.ui.home.listview.LoadingPagingAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Unit;
 
 
 @AndroidEntryPoint
@@ -36,7 +39,7 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
     private HomeFragmentBinding mBinding;
 
     @Inject
-    public HomeAdapter mAdapter;
+    public HomePagingAdapter mAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,18 +56,28 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
         mNavController = NavHostFragment.findNavController(this);
         mViewModel = new ViewModelProvider(this).get(HomeFragmentViewModel.class);
 
+        mViewModel.setupPaging();
+
         setupListView();
         mAlertDialog = new MaterialAlertDialogBuilder(getContext()).setTitle("Error").create();
+
         mViewModel.getErrorLiveData().observe(
                 getViewLifecycleOwner(),
-                errorResult -> {
-                    mAlertDialog.setMessage("Something happened, check API key or network condition");
-                    mAlertDialog.show();
+                apiResult -> {
+                    if (!apiResult.isSuccess()) {
+                        mAlertDialog.setMessage("Something happened, check API key or network condition");
+                        mAlertDialog.show();
+                    }
                 });
 
-        mViewModel.getShowMore().observe(
-                getViewLifecycleOwner(),
-                this::showMoreIcon);
+        mViewModel.getPagingLiveData().observe(getViewLifecycleOwner(), pagingData -> {
+            Log.i(TAG, "PagingLiveData: " + pagingData);
+            mAdapter.submitData(getLifecycle(), pagingData);
+            showMoreIcon(true);
+        });
+
+        LoadingPagingAdapter loadStateAdapter = new LoadingPagingAdapter();
+        mAdapter.withLoadStateFooter(loadStateAdapter);
 
         mViewModel.observerMainListData().observe(
                 getViewLifecycleOwner(),
@@ -72,11 +85,9 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
                     Log.i(TAG, "onViewCreated: " + list.size());
                     if (list.isEmpty()) {
                         updateLoadingIndicator(true);
-                        mViewModel.getGetNextMoviePage();
                     } else {
                         updateLoadingIndicator(false);
                     }
-                    mAdapter.setDataList(list);
                 }
         );
 
@@ -112,7 +123,7 @@ public class HomeFragment extends Fragment implements IHomeItemClickListener {
 
                 if (!recyclerView.canScrollVertically(1)
                         && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    mViewModel.getGetNextMoviePage();
+//                    mViewModel.getGetNextMoviePage();
                 }
             }
 

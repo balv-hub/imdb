@@ -6,8 +6,9 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.paging.PagingData;
 
-import com.balv.imdb.domain.models.ErrorResult;
+import com.balv.imdb.domain.models.ApiResult;
 import com.balv.imdb.domain.models.Movie;
 import com.balv.imdb.domain.repositories.IMovieRepository;
 import com.balv.imdb.domain.usecases.GetMovieDetailUseCase;
@@ -34,9 +35,13 @@ public class HomeFragmentViewModel extends ViewModel {
     @Inject
     GetMovieDetailUseCase getMovieDetailUseCase;
 
-    private MutableLiveData<ErrorResult> apiError = new MutableLiveData<>();
-    public MutableLiveData<ErrorResult> getErrorLiveData(){
+    private MutableLiveData<ApiResult> apiError = new MutableLiveData<>();
+    private MutableLiveData<PagingData<Movie>> pagingDataLiveData = new MutableLiveData<>();
+    public MutableLiveData<ApiResult> getErrorLiveData(){
         return apiError;
+    }
+    public MutableLiveData<PagingData<Movie>> getPagingLiveData(){
+        return pagingDataLiveData;
     }
 
     private MutableLiveData<Boolean> showMore = new MutableLiveData<>();
@@ -58,12 +63,11 @@ public class HomeFragmentViewModel extends ViewModel {
                     Log.i("TAG", "getGetNextMoviePage: " + page);
                     disposable.add(
                             getNextMoviePageUseCase.execute((int) Math.round(page))
-                                    .subscribe(t -> {
-                                        if (!t.isSuccess()) {
-                                            apiError.postValue(t.getError());
-                                        } else {
+                                    .subscribe( t -> {
+                                        if (t.isSuccess()) {
                                             showMore.postValue(true);
                                         }
+                                        apiError.postValue(t);
                                     }
                             )
                     );
@@ -79,5 +83,15 @@ public class HomeFragmentViewModel extends ViewModel {
     protected void onCleared() {
         disposable.dispose();
         super.onCleared();
+    }
+
+    public void setupPaging() {
+        disposable.add(
+                movieRepository.getPagingData()
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(pagingData -> {
+                            pagingDataLiveData.postValue(pagingData);
+                        }, Throwable::printStackTrace)
+        );
     }
 }
