@@ -1,4 +1,20 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+
 rootProject.name = "IMDb"
-include ':presentation'
+include ':app'
 include ':domain'
 include ':data'

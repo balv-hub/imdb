@@ -1,13 +1,16 @@
 plugins {
-    id 'com.android.library'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
-    compileSdkVersion 30
+    compileSdk 35
+
+    namespace "com.balv.imdb.domain"
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
 
@@ -25,22 +28,25 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.core.ktx
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation("com.google.dagger:hilt-android:$hilt_version")
-    annotationProcessor("com.google.dagger:hilt-android-compiler:$hilt_version")
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.17'
-    implementation 'com.squareup.okhttp:okhttp:2.5.0'
+    testImplementation libs.junit
+    androidTestImplementation libs.espresso.core
 
-    implementation "androidx.paging:paging-runtime:$paging_version"
-    implementation "androidx.paging:paging-common:$paging_version"
-    implementation "androidx.paging:paging-rxjava2:$paging_version"
+    implementation libs.hilt.android
+    annotationProcessor libs.hilt.compiler
 
+    implementation libs.okhttp
+
+    implementation libs.paging.runtime
+    implementation libs.paging.common
+    implementation libs.paging.rxjava2
 }
