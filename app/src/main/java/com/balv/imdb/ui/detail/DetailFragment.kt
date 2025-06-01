@@ -72,25 +72,20 @@ class DetailFragment : Fragment() {
     private fun bind(movie: Movie?) {
         movie?.let { mv ->
             mBinding?.title?.text = mv.title
-            mBinding?.year?.text = mv.released
-            mBinding?.actors?.text = mv.actors
-            mBinding?.director?.text = mv.director
-            mBinding?.genre?.text = mv.genre
-            mBinding?.time?.text = mv.time
-            mBinding?.writer?.text = mv.writer
-            mBinding?.imdbRating?.text = mv.imdbRated
+            mBinding?.year?.text = mv.releaseDate
+            mBinding?.genre?.text = mv.genreIds.joinToString()
+            mBinding?.imdbRating?.text = mv.voteAverage.toString()
 
-            mBinding?.year?.text = mv.released
-            mBinding?.plot?.text = mv.plot
+            mBinding?.plot?.text = mv.overview
             mBinding?.poster?.let {
                 Glide.with(requireContext())
-                    .load(mv.poster)
+                    .load(mv.posterPath)
                     .centerCrop()
                     .placeholder(R.drawable.mv_place_holder)
                     .into(it)
             }
             
-            updateLoadingIndicator(TextUtils.isEmpty(mv.imdbRated))
+            updateLoadingIndicator(TextUtils.isEmpty(mv.overview))
         } ?: run {
             updateLoadingIndicator(true)
         }

@@ -3,10 +3,12 @@ package com.balv.imdb.data.model
 import com.google.gson.annotations.SerializedName
 
 data class SearchData(
-    @SerializedName("Search")
-    val list: ArrayList<MovieNetworkObject>? = null,
-    val totalResults: String? = null,
-    @SerializedName("Response")
-    val response: String? = null
+    val page: Int,
+    @SerializedName("results")
+    val results: ArrayList<RemoteMovie>,
+    @SerializedName("total_results")
+    val totalResults: Int,
+    @SerializedName("total_pages")
+    val totalPages:Int,
 )
 

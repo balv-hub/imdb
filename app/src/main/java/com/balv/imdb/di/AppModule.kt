@@ -35,6 +35,16 @@ class AppModule {
     fun providesOkHttpClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(interceptor)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("accept", "application/json")
+                    .addHeader(
+                        "Authorization",
+                        "Bearer ${Constant.TOKEN}"
+                    )
+                    .build()
+                chain.proceed(request)
+            }
             .build()
     }
 

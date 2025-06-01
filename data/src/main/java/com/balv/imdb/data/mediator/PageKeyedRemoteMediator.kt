@@ -44,13 +44,9 @@ class PageKeyedRemoteMediator @Inject constructor(
                 }
             }
 
-            val data = apiService.getMoviesListSync(
-                Constant.API_KEY,
-                Constant.MOVIE_KEYWORD,
-                pageNumber
-            ) ?: throw IOException("Null response from API")
+            val data = apiService.discoverMovies(page = pageNumber)
 
-            val movieList = data.list?.map { Mapper.networkToEntity(it) } ?: emptyList()
+            val movieList = data.results.map { Mapper.networkToEntity(it) } ?: emptyList()
 
             appDb.withTransaction {
                 if (loadType == LoadType.REFRESH) {
@@ -59,7 +55,7 @@ class PageKeyedRemoteMediator @Inject constructor(
                 appDb.movieDao().insertAll(movieList)
             }
 
-            val totalResults = data.totalResults?.toIntOrNull() ?: 0
+            val totalResults = data.totalResults
             val endReached = appDb.movieDao().count() >= totalResults
 
             MediatorResult.Success(endOfPaginationReached = endReached)

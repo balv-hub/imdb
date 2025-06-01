@@ -18,7 +18,8 @@
         android:label="DetailFragment">
         <argument
             android:name="movieId"
-            app:argType="string"/>
+            app:argType="integer"
+            app:nullable="false"/>
 
     </fragment>
 </navigation>

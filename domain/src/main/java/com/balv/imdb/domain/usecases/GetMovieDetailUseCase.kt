@@ -9,11 +9,11 @@ import javax.inject.Inject
 
 class GetMovieDetailUseCase @Inject constructor(
     mMovieRepo: IMovieRepository
-) : BaseUseCase<String, Flow<Movie?>>(mMovieRepo) {
+) : BaseUseCase<Int, Flow<Movie?>>(mMovieRepo) {
 
-    override suspend fun execute(input: String): Flow<Movie?> {
-        val resultFlow = mMovieRepo.getMovieDetail(input).onEach { local ->
-            if (local == null || System.currentTimeMillis() - (local.polledDate ?: 0) > DETAIL_POLL_THRESHOLD) {
+    override suspend fun execute(input: Int): Flow<Movie?> {
+        val resultFlow = mMovieRepo.getMovieDetailLocal(input).onEach { local ->
+            if (local == null || System.currentTimeMillis() - local.polledDate > DETAIL_POLL_THRESHOLD) {
                 mMovieRepo.getDetailFromNetwork(input)
             }
         }

@@ -1,10 +1,12 @@
 package com.balv.imdb.data.network
 
 import com.balv.imdb.data.model.MovieData
+import com.balv.imdb.data.model.RemoteMovie
 import com.balv.imdb.data.model.SearchData
 import io.reactivex.Observable
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 
@@ -12,7 +14,6 @@ interface ApiService {
     @GET(".")
     suspend fun getMoviesList(
         @Query("apikey") apiKey: String?,
-        @Query("s") searchText: String?,
         @Query("page") page: Int
     ): SearchData
 
@@ -23,9 +24,18 @@ interface ApiService {
         @Query("page") page: Int
     ): SearchData?
 
-    @GET(".")
+    @GET("movie/{movie_id}")
     suspend fun getMovieDetail(
-        @Query("apikey") apiKey: String?,
-        @Query("i") imdbId: String?
-    ): MovieData?
+        @Path("movie_id") movieId: Int,
+        @Query("language") language: String = "en-US"
+    ): RemoteMovie
+
+    @GET("discover/movie")
+    suspend fun discoverMovies(
+        @Query("include_adult") includeAdult: Boolean = false,
+        @Query("include_video") includeVideo: Boolean = false,
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1,
+        @Query("sort_by") sortBy: String = "popularity.desc",
+    ): SearchData
 }

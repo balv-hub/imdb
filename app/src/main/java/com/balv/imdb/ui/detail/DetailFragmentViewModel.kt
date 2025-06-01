@@ -23,7 +23,7 @@ class DetailFragmentViewModel @Inject constructor(
 
     val errorLiveData: MutableLiveData<ApiResult<*>> = MutableLiveData()
 
-    suspend fun getMovieDetail(id: String): Flow<Movie?> {
+    suspend fun getMovieDetail(id: Int): Flow<Movie?> {
         return getMovieDetailUseCase.execute(id)
     }
 

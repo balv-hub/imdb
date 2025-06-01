@@ -6,11 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.balv.imdb.domain.models.ApiResult
 import com.balv.imdb.domain.models.Movie
-import com.balv.imdb.domain.repositories.IMovieRepository
 import com.balv.imdb.domain.usecases.GetMovieListUseCase
 import com.balv.imdb.domain.usecases.GetNextMoviePageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject

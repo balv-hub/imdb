@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +34,7 @@ import com.balv.imdb.ui.home.listview.MovieItem
 @Composable
 fun HomeScreen(
     viewModel: HomeFragmentViewModel = hiltViewModel(),
-    onNavigateToDetail: (String) -> Unit
+    onNavigateToDetail: (Int) -> Unit
 ) {
     val pagingItems = viewModel.pagingLiveData.collectAsLazyPagingItems()
     val errorResult by viewModel.errorLiveData.observeAsState()
@@ -61,15 +64,17 @@ fun HomeScreen(
         if (pagingItems.itemCount == 0) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(pagingItems.itemCount) { index ->
-                    pagingItems[index]?.let {
-                        MovieItem(movie = it) {
-                            onNavigateToDetail(it.id)
+                    pagingItems[index]?.let { movie ->
+                        MovieItem(movie = movie) {
+                            onNavigateToDetail(movie.id)
                         }
                     }
                 }
@@ -77,7 +82,7 @@ fun HomeScreen(
                 pagingItems.apply {
                     when (loadState.append) {
                         is LoadState.Loading -> {
-                            item {
+                            item(span = { GridItemSpan(2) }) {
                                 CircularProgressIndicator(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -88,7 +93,7 @@ fun HomeScreen(
                         }
 
                         is LoadState.Error -> {
-                            item {
+                            item(span = { GridItemSpan(2) }) {
                                 Text(
                                     text = "Error loading more...",
                                     modifier = Modifier
@@ -99,8 +104,7 @@ fun HomeScreen(
                             }
                         }
 
-                        is LoadState.NotLoading -> {}
-
+                        is LoadState.NotLoading -> Unit
                     }
                 }
             }

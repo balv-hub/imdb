@@ -1,18 +1,16 @@
 package com.balv.imdb.ui.home.listview
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,54 +22,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.balv.imdb.R
 import com.balv.imdb.domain.models.Movie
 
+const val tmdbRootPosterPath = "https://image.tmdb.org/t/p/w185"
 @Composable
 fun MovieItem(
     movie: Movie,
     onClick: () -> Unit
 ) {
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        val (thumbRef, detailsRef) = createRefs()
-
-        Image(
-            painter = rememberAsyncImagePainter(model = movie.poster),
-            contentDescription = movie.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(width = 50.dp, height = 70.dp)
-                .constrainAs(thumbRef) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                }
-                .padding(20.dp)
-        )
-
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .constrainAs(detailsRef) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(thumbRef.end, margin = 20.dp)
-                    end.linkTo(parent.end, margin = 20.dp)
-                }
-                .fillMaxHeight()
+                .height(180.dp)
+                .clickable { onClick() }
         ) {
+            Image(
+                painter = rememberAsyncImagePainter(model = tmdbRootPosterPath + movie.posterPath),
+                contentDescription = movie.title,
+            )
             Text(
-                text = movie.title.orEmpty(),
+                text = movie.title,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White,
                 maxLines = 3,
@@ -90,18 +64,40 @@ fun MovieItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = movie.imdbRated.orEmpty(),
+                    text = movie.voteAverage.toString(),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color(0xFFFFC83D)
                 )
             }
 
             Text(
-                text = movie.released.orEmpty(),
+                text = movie.releaseDate,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White,
                 modifier = Modifier.padding(top = 4.dp)
             )
-        }
     }
+}
+
+@Preview
+@Composable
+fun MovieItemPreview() {
+    MovieItem(
+        movie = Movie(
+            id = 1,
+            title = "Exterritorial",
+            overview = "When her son vanishes inside a US consulate, ex-special forces soldier Sara does everything in her power to find him — and uncovers a dark conspiracy.",
+            popularity = 134.5884,
+            posterPath = "/jM2uqCZNKbiyStyzXOERpMqAbdx.jpg",
+            releaseDate = "2025-04-29",
+            originalTitle = "Exterritorial",
+            voteAverage = 6.7856,
+            voteCount = 10,
+            adult = false,
+            backdropPath = "/14UFWFJsGeInCbhTiehRLTff4Yx.jpg",
+            genreIds = listOf(1, 2, 3, 4),
+            originalLanguage = "en",
+            video = false
+
+        ), onClick = {})
 }

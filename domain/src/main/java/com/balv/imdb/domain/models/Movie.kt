@@ -1,16 +1,19 @@
 package com.balv.imdb.domain.models
 
 data class Movie(
-    val title: String? = null,
-    val id: String,
-    val released: String? = null,
-    val time: String? = null,
-    val genre: String? = null,
-    val director: String? = null,
-    val writer: String? = null,
-    val actors: String? = null,
-    val imdbRated: String? = null,
-    val poster: String? = null,
-    val plot: String? = null,
-    val polledDate: Long? = null
+    val id: Int,
+    val adult: Boolean,
+    val backdropPath: String?,
+    val genreIds: List<Int>,
+    val originalLanguage: String,
+    val originalTitle: String,
+    val overview: String,
+    val popularity: Double,
+    val posterPath: String?,
+    val releaseDate: String,
+    val title: String,
+    val video: Boolean,
+    val voteAverage: Double,
+    val voteCount: Int,
+    val polledDate: Long = 0,
 )

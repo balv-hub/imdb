@@ -61,13 +61,13 @@ class HomePagingAdapter @Inject constructor() :
                     )
                 }
                 title.text = data.title
-                rating.text = data.imdbRated
-                date.text = data.released
+                rating.text = data.voteAverage.toString()
+                date.text = data.releaseDate
                 var requestOptions = RequestOptions()
                 requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(16))
                 Glide
                     .with(view.context)
-                    .load(data.poster)
+                    .load(data.posterPath)
                     .centerCrop()
                     .placeholder(R.drawable.mv_place_holder)
                     .apply(requestOptions)
@@ -81,11 +81,11 @@ class HomePagingAdapter @Inject constructor() :
         private val DIFF_CALLBACK: DiffUtil.ItemCallback<Movie> =
             object : DiffUtil.ItemCallback<Movie>() {
                 override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean {
-                    return TextUtils.equals(oldItem.id, newItem.id)
+                    return oldItem.id == newItem.id
                 }
 
                 override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean {
-                    return TextUtils.equals(oldItem.imdbRated, newItem.imdbRated)
+                    return oldItem.voteAverage == newItem.voteAverage
                 }
             }
     }

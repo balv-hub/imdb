@@ -1,69 +1,81 @@
 package com.balv.imdb.data.mapper
 
-import com.balv.imdb.data.model.MovieData
 import com.balv.imdb.data.model.MovieEntity
-import com.balv.imdb.data.model.MovieNetworkObject
+import com.balv.imdb.data.model.RemoteMovie
 import com.balv.imdb.domain.models.Movie
 
 object Mapper {
-    fun networkToEntity(input: MovieNetworkObject): MovieEntity {
-        val entity = MovieEntity(
-            id = input.imdbID,
+    fun networkToEntity(input: RemoteMovie) = MovieEntity(
+            id = input.id,
+            adult = input.adult,
+            backdropPath = input.backdropPath,
+            genreIds = input.genreIds,
+            originalLanguage = input.originalLanguage,
+            originalTitle = input.originalTitle,
+            overview = input.overview,
+            popularity = input.popularity,
+            posterPath = input.posterPath,
+            releaseDate = input.releaseDate,
             title = input.title,
-            released = input.year,
-            poster = input.poster
+            video = input.video,
+            voteAverage = input.voteAverage,
+            voteCount = input.voteCount,
         )
-        return entity
-    }
+
+    fun entityToDomain(input: MovieEntity) =  Movie(
+        id = input.id,
+        adult = input.adult,
+        backdropPath = input.backdropPath,
+        genreIds = input.genreIds,
+        originalLanguage = input.originalLanguage,
+        originalTitle = input.originalTitle,
+        overview = input.overview,
+        popularity = input.popularity,
+        posterPath = input.posterPath,
+        releaseDate = input.releaseDate,
+        title = input.title,
+        video = input.video,
+        voteAverage = input.voteAverage,
+        voteCount = input.voteCount,
+    )
 
 
-    fun entityToDomain(input: MovieEntity): Movie {
-        return Movie( 
-            id = input.id, 
-            title = input.title, 
-            released = input.released, 
-            poster = input.poster,
-            imdbRated = input.imdbRated,
-            plot = input.plot,
-            writer = input.writer,
-            director = input.director,
-            actors = input.actors,
-            time = input.time,
-            genre = input.genre
-        )
-    }
-
-
-    fun detailToEntity(input: MovieData): MovieEntity {
+    fun remoteMovieToEntity(input: RemoteMovie): MovieEntity {
         return MovieEntity(
-            id = input.imdbID,
+            id = input.id,
+            adult = input.adult,
+            backdropPath = input.backdropPath,
+            genreIds = input.genreIds,
+            originalLanguage = input.originalLanguage,
+            originalTitle = input.originalTitle,
+            overview = input.overview,
+            popularity = input.popularity,
+            posterPath = input.posterPath,
+            releaseDate = input.releaseDate,
             title = input.title,
-            released = input.released,
-            poster = input.poster,
-            imdbRated = input.imdbRating,
-            plot = input.plot,
-            writer = input.writer,
-            director = input.director,
-            actors = input.actors,
-            time = input.runtime,
-            genre = input.genre
+            video = input.video,
+            voteAverage = input.voteAverage,
+            voteCount = input.voteCount,
         )
     }
 
 
-    fun networkToDomain(input: MovieData): Movie {
-        return Movie( 
+    fun networkToDomain(input: RemoteMovie): Movie {
+        return Movie(
+            id = input.id,
+            adult = input.adult,
+            backdropPath = input.backdropPath,
+            genreIds = input.genreIds,
+            originalLanguage = input.originalLanguage,
+            originalTitle = input.originalTitle,
+            overview = input.overview,
+            popularity = input.popularity,
+            posterPath = input.posterPath,
+            releaseDate = input.releaseDate,
             title = input.title,
-            id = input.imdbID,
-            released = input.released, 
-            time = input.runtime, 
-            genre = input.genre, 
-            director = input.director, 
-            writer = input.writer, 
-            actors = input.actors, 
-            imdbRated = input.imdbRating, 
-            poster = input.poster, 
-            plot = input.plot, 
+            video = input.video,
+            voteAverage = input.voteAverage,
+            voteCount = input.voteCount,
             polledDate = System.currentTimeMillis() 
         )
     }

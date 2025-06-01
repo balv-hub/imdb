@@ -54,13 +54,13 @@ class HomeAdapter @Inject constructor() : RecyclerView.Adapter<HomeAdapter.ItemV
         fun bind(data: Movie) {
             view.setOnClickListener { view: View? -> mClickListener!!.onItemClick(data.id) }
             title.text = data.title
-            rating.text = data.imdbRated
-            date.text = data.released
+            rating.text = data.voteAverage.toString()
+            date.text = data.releaseDate
             var requestOptions = RequestOptions()
             requestOptions = requestOptions.transforms(CenterCrop(), RoundedCorners(16))
             Glide
                 .with(view.context)
-                .load(data.poster)
+                .load(data.posterPath)
                 .centerCrop()
                 .placeholder(R.drawable.mv_place_holder)
                 .apply(requestOptions)

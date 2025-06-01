@@ -12,16 +12,12 @@ import com.balv.imdb.data.local.AppDb
 import com.balv.imdb.data.local.UserPreference
 import com.balv.imdb.data.mapper.Mapper
 import com.balv.imdb.data.mediator.PageKeyedRemoteMediator
-import com.balv.imdb.data.model.MovieData
-import com.balv.imdb.data.model.MovieEntity
-import com.balv.imdb.data.model.MovieNetworkObject
 import com.balv.imdb.data.model.SearchData
 import com.balv.imdb.data.network.ApiService
 import com.balv.imdb.domain.models.ApiResult
 import com.balv.imdb.domain.models.ErrorResult
 import com.balv.imdb.domain.models.Movie
 import com.balv.imdb.domain.repositories.IMovieRepository
-import io.reactivex.Observable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
@@ -34,31 +30,28 @@ class AppRepo @Inject constructor(
     private val userPref: UserPreference
 ) : IMovieRepository {
 
-    override suspend fun getMovieDetail(id: String): Flow<Movie?> {
-        return appDb.movieDao().getMovieDetailSource(id)
-            .map { input: MovieEntity? -> input?.let { Mapper.entityToDomain(it) } }
+    override suspend fun getMovieDetailLocal(id: Int): Flow<Movie?> {
+        return appDb.movieDao().getMovieDetailLocal(id)
+            .map { input-> input?.let { Mapper.entityToDomain(it) } }
     }
 
-    override suspend fun getDetailFromNetwork(id: String): ApiResult<Movie?> {
+    override suspend fun getDetailFromNetwork(id: Int): ApiResult<Movie?> {
         return getRemoteResponse {
-            apiService.getMovieDetail(Constant.API_KEY, id)?.let { result: MovieData? ->
-                result?.let {
-                    Mapper.detailToEntity(it)
-                    appDb.movieDao().updateMovies()
-                    Mapper.networkToDomain(it)
-                }
+            apiService.getMovieDetail(movieId = id).let { result->
+                appDb.movieDao().updateMovies(Mapper.remoteMovieToEntity(result))
+                Mapper.networkToDomain(result)
             }
         }
     }
 
     override suspend fun getNextRemoteDataPage(page: Int): ApiResult<SearchData> {
         return getRemoteResponse {
-            apiService.getMoviesList(Constant.API_KEY, Constant.MOVIE_KEYWORD, page)
+            apiService.discoverMovies(page = page)
                 .let { result: SearchData ->
-                    Log.i(TAG, "getRemoteData: listSize=" + result.list?.size)
-                    result.list?.map { networkObject: MovieNetworkObject ->
-                        Mapper.networkToEntity(networkObject)
-                    }?.also {
+                    Log.i(TAG, "getRemoteData: listSize=" + result.results.size)
+                    result.results.map { remote ->
+                        Mapper.networkToEntity(remote)
+                    }.also {
                         appDb.movieDao().insertAll(it)
                     }
                     result
@@ -90,8 +83,8 @@ class AppRepo @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun allMoviesPaging(): Flow<PagingData<Movie>> {
         val config = PagingConfig(
-            10, 10,
-            true, 10, 200
+            10, 1,
+            true, 10, 30
         )
         val pager = Pager(
             config, 1,

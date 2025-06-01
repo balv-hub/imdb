@@ -7,8 +7,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.balv.imdb.data.model.MovieEntity
-import io.reactivex.Observable
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,11 +19,11 @@ abstract class MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertAll(movieEntities: List<MovieEntity>)
 
-    @Update
+    @Upsert
     abstract fun updateMovies(vararg movieEntities: MovieEntity)
 
     @Query("SELECT * FROM movies WHERE id = :id")
-    abstract fun getMovieDetailSource(id: String): Flow<MovieEntity>
+    abstract fun getMovieDetailLocal(id: Int): Flow<MovieEntity?>
 
     @Delete
     abstract fun deleteItem(vararg ids: MovieEntity?)
