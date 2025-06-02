@@ -12,4 +12,7 @@ interface IMovieRepository {
     suspend fun getDataRefreshDate(): Long
     suspend fun setDataRefreshDate(date: Long)
     fun allMoviesPaging(): Flow<PagingData<Movie>>
+    fun getPopularMoviesFetchedDate(): Long
+    fun getPopularMovies(): Flow<List<Movie>>
+    suspend fun refreshPopularMovies()
 }

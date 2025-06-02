@@ -10,6 +10,6 @@ class GetMovieListUseCase @Inject constructor(
     mMovieRepo: IMovieRepository
 ) : BaseUseCase<Unit, Flow<PagingData<Movie>>>(mMovieRepo) {
     override suspend fun execute(input: Unit): Flow<PagingData<Movie>> {
-        return mMovieRepo.allMoviesPaging()
+        return movieRepository.allMoviesPaging()
     }
 }

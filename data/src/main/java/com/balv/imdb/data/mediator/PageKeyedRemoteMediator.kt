@@ -46,7 +46,7 @@ class PageKeyedRemoteMediator @Inject constructor(
 
             val data = apiService.discoverMovies(page = pageNumber)
 
-            val movieList = data.results.map { Mapper.networkToEntity(it) } ?: emptyList()
+            val movieList = data.results.map { Mapper.remoteMovieToEntity(it) }
 
             appDb.withTransaction {
                 if (loadType == LoadType.REFRESH) {

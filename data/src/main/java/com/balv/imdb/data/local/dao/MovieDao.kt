@@ -17,16 +17,16 @@ abstract class MovieDao {
     abstract fun getMainMovieList(): Flow<List<MovieEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertAll(movieEntities: List<MovieEntity>)
+    abstract suspend fun insertAll(movieEntities: List<MovieEntity>)
 
     @Upsert
-    abstract fun updateMovies(vararg movieEntities: MovieEntity)
+    abstract suspend fun updateMovies(vararg movieEntities: MovieEntity)
 
     @Query("SELECT * FROM movies WHERE id = :id")
     abstract fun getMovieDetailLocal(id: Int): Flow<MovieEntity?>
 
     @Delete
-    abstract fun deleteItem(vararg ids: MovieEntity?)
+    abstract suspend fun deleteItem(vararg ids: MovieEntity?)
 
     @Query("SELECT COUNT(*) FROM movies")
     abstract suspend fun count(): Int
@@ -36,4 +36,7 @@ abstract class MovieDao {
 
     @Query("SELECT * FROM movies")
     abstract fun pagingSource(): PagingSource<Int, MovieEntity>
+
+    @Query("SELECT * FROM movies ORDER BY popularity DESC LIMIT 20")
+    abstract fun getTop20PopularMovies(): Flow<List<MovieEntity>>
 }

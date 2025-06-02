@@ -12,15 +12,15 @@ class GetMovieDetailUseCase @Inject constructor(
 ) : BaseUseCase<Int, Flow<Movie?>>(mMovieRepo) {
 
     override suspend fun execute(input: Int): Flow<Movie?> {
-        val resultFlow = mMovieRepo.getMovieDetailLocal(input).onEach { local ->
+        val resultFlow = movieRepository.getMovieDetailLocal(input).onEach { local ->
             if (local == null || System.currentTimeMillis() - local.polledDate > DETAIL_POLL_THRESHOLD) {
-                mMovieRepo.getDetailFromNetwork(input)
+                movieRepository.getDetailFromNetwork(input)
             }
         }
         return resultFlow
     }
 
     companion object {
-         val DETAIL_POLL_THRESHOLD = TimeUnit.MINUTES.toMillis(30)
+         val DETAIL_POLL_THRESHOLD = TimeUnit.MINUTES.toMillis(1)
     }
 }

@@ -38,7 +38,10 @@ class AppRepo @Inject constructor(
     override suspend fun getDetailFromNetwork(id: Int): ApiResult<Movie?> {
         return getRemoteResponse {
             apiService.getMovieDetail(movieId = id).let { result->
-                appDb.movieDao().updateMovies(Mapper.remoteMovieToEntity(result))
+                val localEntity = Mapper.remoteMovieToEntity(result).copy(
+                    polledDate = System.currentTimeMillis()
+                )
+                appDb.movieDao().updateMovies(localEntity)
                 Mapper.networkToDomain(result)
             }
         }
@@ -50,7 +53,7 @@ class AppRepo @Inject constructor(
                 .let { result: SearchData ->
                     Log.i(TAG, "getRemoteData: listSize=" + result.results.size)
                     result.results.map { remote ->
-                        Mapper.networkToEntity(remote)
+                        Mapper.remoteMovieToEntity(remote)
                     }.also {
                         appDb.movieDao().insertAll(it)
                     }
@@ -97,7 +100,31 @@ class AppRepo @Inject constructor(
             }
     }
 
+    override fun getPopularMoviesFetchedDate(): Long =
+        userPref.getLongValue(PREF_POPULAR_FETCHED_DATE)
+
+    override fun getPopularMovies(): Flow<List<Movie>> {
+        return appDb.movieDao().getTop20PopularMovies().map {
+            Log.i(TAG, "getPopularMovies: $it")
+            it.map { movieEntity -> Mapper.entityToDomain(movieEntity) }
+        }
+    }
+
+    override suspend fun refreshPopularMovies() {
+        getRemoteResponse {
+            apiService.getPopularMovies()
+        }.data?.results?.let { listMv ->
+            userPref.saveLongValue(PREF_POPULAR_FETCHED_DATE, System.currentTimeMillis())
+            appDb.movieDao().insertAll(
+                listMv.map {
+                    Mapper.remoteMovieToEntity(it)
+                }
+            )
+        }
+    }
+
     companion object {
         private const val TAG = "AppRepo"
+        private const val PREF_POPULAR_FETCHED_DATE = "PREF_POPULAR_FETCHED_DATE"
     }
 }

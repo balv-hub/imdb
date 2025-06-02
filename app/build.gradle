@@ -90,8 +90,8 @@ dependencies {
     implementation libs.okhttp
     implementation libs.okhttp.logging
     implementation libs.coil.compose
-
-
+    def nav_version = "2.9.0"
+    implementation "androidx.navigation:navigation-compose:$nav_version"
     implementation libs.glide
     ksp libs.glide.compiler
 
