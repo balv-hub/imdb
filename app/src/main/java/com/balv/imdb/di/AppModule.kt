@@ -6,7 +6,6 @@ import com.balv.imdb.data.BuildConfig
 import com.balv.imdb.data.Constant
 import com.balv.imdb.data.local.AppDb
 import com.balv.imdb.data.local.UserPreference
-import com.balv.imdb.data.mapper.Mapper
 import com.balv.imdb.data.network.ApiService
 import com.balv.imdb.data.repository.AppRepo
 import com.balv.imdb.domain.repositories.IMovieRepository
@@ -48,7 +47,6 @@ class AppModule {
             }
             .build()
     }
-
 
     @Provides
     @Singleton

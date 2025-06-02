@@ -1,6 +1,8 @@
 package com.balv.imdb.data.network
 
+import com.balv.imdb.data.model.GenreList
 import com.balv.imdb.data.model.MovieData
+import com.balv.imdb.data.model.MovieDetailRemote
 import com.balv.imdb.data.model.RemoteMovie
 import com.balv.imdb.data.model.SearchData
 import io.reactivex.Observable
@@ -28,7 +30,7 @@ interface ApiService {
     suspend fun getMovieDetail(
         @Path("movie_id") movieId: Int,
         @Query("language") language: String = "en-US"
-    ): RemoteMovie
+    ): MovieDetailRemote
 
     @GET("discover/movie")
     suspend fun discoverMovies(
@@ -44,4 +46,9 @@ interface ApiService {
         @Query("language") language: String = "en-US",
         @Query("page") page: Int = 1
     ): SearchData
+
+    @GET("genre/movie/list")
+    suspend fun getMovieGenreList(
+        @Query("language") language: String="en"
+    ): GenreList
 }

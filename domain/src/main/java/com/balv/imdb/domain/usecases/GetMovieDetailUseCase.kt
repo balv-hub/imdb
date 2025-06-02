@@ -1,6 +1,7 @@
 package com.balv.imdb.domain.usecases
 
 import com.balv.imdb.domain.models.Movie
+import com.balv.imdb.domain.models.MovieDetail
 import com.balv.imdb.domain.repositories.IMovieRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
@@ -9,11 +10,11 @@ import javax.inject.Inject
 
 class GetMovieDetailUseCase @Inject constructor(
     mMovieRepo: IMovieRepository
-) : BaseUseCase<Int, Flow<Movie?>>(mMovieRepo) {
+) : BaseUseCase<Int, Flow<MovieDetail?>>(mMovieRepo) {
 
-    override suspend fun execute(input: Int): Flow<Movie?> {
+    override suspend fun execute(input: Int): Flow<MovieDetail?> {
         val resultFlow = movieRepository.getMovieDetailLocal(input).onEach { local ->
-            if (local == null || System.currentTimeMillis() - local.polledDate > DETAIL_POLL_THRESHOLD) {
+            if (local == null || System.currentTimeMillis() - local.refreshedDate > DETAIL_POLL_THRESHOLD) {
                 movieRepository.getDetailFromNetwork(input)
             }
         }

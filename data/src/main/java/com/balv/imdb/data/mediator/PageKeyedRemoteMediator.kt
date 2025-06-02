@@ -8,7 +8,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.balv.imdb.data.Constant
 import com.balv.imdb.data.local.AppDb
-import com.balv.imdb.data.mapper.Mapper
+import com.balv.imdb.data.mapper.remoteMovieToEntity
 import com.balv.imdb.data.model.MovieEntity
 import com.balv.imdb.data.network.ApiService
 import com.balv.imdb.domain.repositories.IMovieRepository
@@ -46,7 +46,7 @@ class PageKeyedRemoteMediator @Inject constructor(
 
             val data = apiService.discoverMovies(page = pageNumber)
 
-            val movieList = data.results.map { Mapper.remoteMovieToEntity(it) }
+            val movieList = data.results.map { it.remoteMovieToEntity() }
 
             appDb.withTransaction {
                 if (loadType == LoadType.REFRESH) {

@@ -7,16 +7,23 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import androidx.room.Transaction
 import com.balv.imdb.data.Constant
 import com.balv.imdb.data.local.AppDb
 import com.balv.imdb.data.local.UserPreference
-import com.balv.imdb.data.mapper.Mapper
+import com.balv.imdb.data.mapper.entityToDomain
+import com.balv.imdb.data.mapper.networkToDomain
+import com.balv.imdb.data.mapper.remoteGenreToEntity
+import com.balv.imdb.data.mapper.remoteMovieToEntity
+import com.balv.imdb.data.mapper.toDomain
+import com.balv.imdb.data.mapper.toEntity
 import com.balv.imdb.data.mediator.PageKeyedRemoteMediator
 import com.balv.imdb.data.model.SearchData
 import com.balv.imdb.data.network.ApiService
 import com.balv.imdb.domain.models.ApiResult
 import com.balv.imdb.domain.models.ErrorResult
 import com.balv.imdb.domain.models.Movie
+import com.balv.imdb.domain.models.MovieDetail
 import com.balv.imdb.domain.repositories.IMovieRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -30,35 +37,35 @@ class AppRepo @Inject constructor(
     private val userPref: UserPreference
 ) : IMovieRepository {
 
-    override suspend fun getMovieDetailLocal(id: Int): Flow<Movie?> {
-        return appDb.movieDao().getMovieDetailLocal(id)
-            .map { input-> input?.let { Mapper.entityToDomain(it) } }
+    override suspend fun getMovieDetailLocal(id: Int): Flow<MovieDetail?> {
+        return appDb.movideDetailDao().getMovieDetailLocal(id).map { input -> input?.toDomain() }
     }
 
-    override suspend fun getDetailFromNetwork(id: Int): ApiResult<Movie?> {
+    override suspend fun getDetailFromNetwork(id: Int): ApiResult<MovieDetail?> {
         return getRemoteResponse {
-            apiService.getMovieDetail(movieId = id).let { result->
-                val localEntity = Mapper.remoteMovieToEntity(result).copy(
-                    polledDate = System.currentTimeMillis()
+            apiService.getMovieDetail(movieId = id).let { result ->
+                val localEntity = result.toEntity()?.copy(
+                    lastRefreshed = System.currentTimeMillis()
                 )
-                appDb.movieDao().updateMovies(localEntity)
-                Mapper.networkToDomain(result)
+                if (localEntity != null) {
+                    appDb.movideDetailDao().updateMovies(localEntity)
+                }
+                result.networkToDomain()
             }
         }
     }
 
     override suspend fun getNextRemoteDataPage(page: Int): ApiResult<SearchData> {
         return getRemoteResponse {
-            apiService.discoverMovies(page = page)
-                .let { result: SearchData ->
-                    Log.i(TAG, "getRemoteData: listSize=" + result.results.size)
-                    result.results.map { remote ->
-                        Mapper.remoteMovieToEntity(remote)
-                    }.also {
-                        appDb.movieDao().insertAll(it)
-                    }
-                    result
+            apiService.discoverMovies(page = page).let { result: SearchData ->
+                Log.i(TAG, "getRemoteData: listSize=" + result.results.size)
+                result.results.map { remote ->
+                    remote.remoteMovieToEntity()
+                }.also {
+                    appDb.movieDao().insertAll(it)
                 }
+                result
+            }
         }
     }
 
@@ -86,18 +93,15 @@ class AppRepo @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun allMoviesPaging(): Flow<PagingData<Movie>> {
         val config = PagingConfig(
-            10, 1,
-            true, 10, 30
+            10, 1, true, 10, 30
         )
         val pager = Pager(
-            config, 1,
-            PageKeyedRemoteMediator(this, appDb, apiService)
+            config, 1, PageKeyedRemoteMediator(this, appDb, apiService)
         ) { appDb.movieDao().pagingSource() }
 
-        return pager.flow
-            .map { pagingData ->
-                pagingData.map { input -> input.let { Mapper.entityToDomain(it) } }
-            }
+        return pager.flow.map { pagingData ->
+            pagingData.map { input -> input.entityToDomain() }
+        }
     }
 
     override fun getPopularMoviesFetchedDate(): Long =
@@ -106,7 +110,7 @@ class AppRepo @Inject constructor(
     override fun getPopularMovies(): Flow<List<Movie>> {
         return appDb.movieDao().getTop20PopularMovies().map {
             Log.i(TAG, "getPopularMovies: $it")
-            it.map { movieEntity -> Mapper.entityToDomain(movieEntity) }
+            it.map { movieEntity -> movieEntity.entityToDomain() }
         }
     }
 
@@ -117,14 +121,30 @@ class AppRepo @Inject constructor(
             userPref.saveLongValue(PREF_POPULAR_FETCHED_DATE, System.currentTimeMillis())
             appDb.movieDao().insertAll(
                 listMv.map {
-                    Mapper.remoteMovieToEntity(it)
-                }
-            )
+                    it.remoteMovieToEntity()
+                })
         }
+    }
+
+    override suspend fun refreshGenreList() {
+        getRemoteResponse {
+            apiService.getMovieGenreList()
+        }.data?.genres?.let { genres ->
+            userPref.saveLongValue(PREF_GENRE_FETCHED_DATE, System.currentTimeMillis())
+            appDb.genreDao().replaceWithNewGenres(
+                genres.map { it.remoteGenreToEntity() })
+        }
+    }
+
+    override fun getGenreFetchedDate(): Long = userPref.getLongValue(PREF_GENRE_FETCHED_DATE)
+
+    override suspend fun getGenresNameById(ids: List<Int>): List<String> {
+        return appDb.genreDao().getNamesById(ids)
     }
 
     companion object {
         private const val TAG = "AppRepo"
         private const val PREF_POPULAR_FETCHED_DATE = "PREF_POPULAR_FETCHED_DATE"
+        private const val PREF_GENRE_FETCHED_DATE = "PREF_GENRE_FETCHED_DATE"
     }
 }
