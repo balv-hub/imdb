@@ -3,14 +3,14 @@ package com.balv.imdb.domain.models
 open class ApiResult<T> {
     var isSuccess: Boolean = false
     private set
-    var result: T? = null
+    var data: T? = null
         private set
     var error: ErrorResult? = null
         private set
 
     private constructor(result: T) {
         this.isSuccess = true
-        this.result = result
+        this.data = result
     }
 
     private constructor(error: ErrorResult?) {

@@ -2,6 +2,7 @@ package com.balv.imdb.di
 
 import android.app.Application
 import androidx.room.Room
+import com.balv.imdb.data.BuildConfig
 import com.balv.imdb.data.Constant
 import com.balv.imdb.data.local.AppDb
 import com.balv.imdb.data.local.UserPreference
@@ -40,7 +41,7 @@ class AppModule {
                     .addHeader("accept", "application/json")
                     .addHeader(
                         "Authorization",
-                        "Bearer ${Constant.TOKEN}"
+                        "Bearer ${BuildConfig.IMDB_API_TOKEN}"
                     )
                     .build()
                 chain.proceed(request)

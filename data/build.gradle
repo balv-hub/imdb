@@ -6,7 +6,12 @@ plugins {
 }
 def room_version = "2.3.0"
 
+def localProperties = new Properties()
+localProperties.load(rootProject.file("local.properties").newDataInputStream())
 
+def myApiToken = localProperties['IMDB_API_TOKEN']
+
+android.buildFeatures.buildConfig = true
 android {
     compileSdk 35
     namespace "com.balv.imdb.data"
@@ -19,6 +24,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        buildConfigField("String", "IMDB_API_TOKEN", "\"$myApiToken\"")
     }
 
     buildTypes {

@@ -38,4 +38,10 @@ interface ApiService {
         @Query("page") page: Int = 1,
         @Query("sort_by") sortBy: String = "popularity.desc",
     ): SearchData
+
+    @GET("movie/popular")
+    suspend fun getPopularMovies(
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
+    ): SearchData
 }

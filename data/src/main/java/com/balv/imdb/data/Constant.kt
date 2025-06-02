@@ -3,7 +3,6 @@ package com.balv.imdb.data
 object Constant {
     const val API_KEY: String = "b746603a"
     const val DOMAIN: String = "https://api.themoviedb.org/3/"
-    const val TOKEN: String = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwNjg0MDQ2M2QzZDI1Zjg5MzNjZjAwYTk3NTNlOWFlMSIsIm5iZiI6MTc0ODM4MzY5MC41MTIsInN1YiI6IjY4MzYzN2NhMzUzNzAxMmEyMjQxNGIxNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.kkRerUQGG_5tolyX-hK0p_c0nLNZYqbXosVrbF3LOa0"
     const val MOVIE_KEYWORD: String = "home"
     const val INITIALIZED: String = "init"
     const val DATA_REFRESH: String = "refresh_date"
