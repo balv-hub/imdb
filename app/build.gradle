@@ -90,13 +90,15 @@ dependencies {
     implementation libs.okhttp
     implementation libs.okhttp.logging
     implementation libs.coil.compose
-    def nav_version = "2.9.0"
-    implementation "androidx.navigation:navigation-compose:$nav_version"
+    implementation libs.navigation.compose
     implementation libs.glide
     ksp libs.glide.compiler
 
     implementation libs.swiperefreshlayout
     implementation libs.rxandroid
+
+    implementation(libs.lottie.compose)
+    implementation(libs.accompanist.swiperefresh)
 
     testImplementation libs.junit
     androidTestImplementation libs.junit.ext

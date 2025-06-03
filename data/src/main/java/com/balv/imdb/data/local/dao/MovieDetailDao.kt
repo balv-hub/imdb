@@ -6,10 +6,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
-import com.balv.imdb.data.model.MovieDetailEntity
-import com.balv.imdb.data.model.MovieEntity
+import com.balv.imdb.data.model.entity.MovieDetailEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,7 +22,11 @@ abstract class MovieDetailDao {
     abstract suspend fun updateMovies(vararg movieEntities: MovieDetailEntity)
 
     @Query("SELECT * FROM movie_details WHERE id = :id")
-    abstract fun getMovieDetailLocal(id: Int): Flow<MovieDetailEntity?>
+    abstract fun getMovieDetailLocalFlow(id: Int): Flow<MovieDetailEntity?>
+
+    @Query("SELECT * FROM movie_details WHERE id = :id")
+    abstract fun getMovieDetailLocal(id: Int): MovieDetailEntity?
+
 
     @Delete
     abstract suspend fun deleteItem(vararg ids: MovieDetailEntity?)

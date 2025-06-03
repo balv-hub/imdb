@@ -1,4 +1,4 @@
-package com.balv.imdb.data.model
+package com.balv.imdb.data.model.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -14,7 +14,9 @@ import com.google.gson.reflect.TypeToken
     ProductionCompanyListConverter::class,
     ProductionCountryListConverter::class,
     SpokenLanguageListConverter::class,
-    GenreListConverter::class // Add the new TypeConverter
+    GenreListConverter::class,
+    CastMemberListConverter::class,
+    CrewMemberListConverter::class,
 )
 data class MovieDetailEntity(
     @PrimaryKey
@@ -38,7 +40,7 @@ data class MovieDetailEntity(
     val originalLanguage: String,
     val originalTitle: String,
     val overview: String,
-    val popularity: Double,
+    val popularity: Double?,
     val posterPath: String?,
     val productionCompanies: List<ProductionCompanyLocal>,
     val productionCountries: List<ProductionCountryLocal>,
@@ -52,7 +54,9 @@ data class MovieDetailEntity(
     val video: Boolean,
     val voteAverage: Double,
     val voteCount: Int,
-    val lastRefreshed: Long = System.currentTimeMillis()
+    val lastRefreshed: Long = System.currentTimeMillis(),
+    val castMemberList: List<CastMemberLocal>? = emptyList(),
+    val crewMemberList: List<CrewMemberLocal>? = emptyList(),
 )
 
 object GenreListConverter {
@@ -121,6 +125,42 @@ object SpokenLanguageListConverter {
     }
 }
 
+object CastMemberListConverter {
+    private val gson = Gson()
+
+    @TypeConverter
+    fun fromCastMemberList(value: List<CastMemberLocal>?): String? {
+        // Only convert to JSON if the list is not null and not empty.
+        // This stores NULL in the DB for empty lists, which toCastMemberList handles.
+        return value?.takeIf { it.isNotEmpty() }?.let { gson.toJson(it) }
+    }
+
+    @TypeConverter
+    fun toCastMemberList(value: String?): List<CastMemberLocal> { // Return non-nullable List
+        return value?.let {
+            val type = object : TypeToken<List<CastMemberLocal>>() {}.type
+            gson.fromJson(it, type)
+        } ?: emptyList() // If DB value is NULL, return an empty list
+    }
+}
+
+object CrewMemberListConverter {
+    private val gson = Gson()
+
+    @TypeConverter
+    fun fromCrewMemberList(value: List<CrewMemberLocal>?): String? {
+        return value?.takeIf { it.isNotEmpty() }?.let { gson.toJson(it) }
+    }
+
+    @TypeConverter
+    fun toCrewMemberList(value: String?): List<CrewMemberLocal> { // Return non-nullable List
+        return value?.let {
+            val type = object : TypeToken<List<CrewMemberLocal>>() {}.type
+            gson.fromJson(it, type)
+        } ?: emptyList() // If DB value is NULL, return an empty list
+    }
+}
+
 data class ProductionCompanyLocal(
     val id: Int,
     val logoPath: String?,
@@ -142,4 +182,19 @@ data class SpokenLanguageLocal(
 data class GenreLocal(
     val id: Int,
     val name: String
+)
+
+data class CastMemberLocal(
+    val personId: Int,
+    val name: String,
+    val character: String,
+    val profilePath: String?,
+)
+
+data class CrewMemberLocal(
+    val personId: Int,
+    val name: String,
+    val profilePath: String?,
+    val department: String,
+    val job: String,
 )

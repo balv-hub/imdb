@@ -1,4 +1,4 @@
-package com.balv.imdb.data.model
+package com.balv.imdb.data.model.dto
 
 data class GenreList(
     val genres: List<Genre>

@@ -1,9 +1,11 @@
 package com.balv.imdb.ui.home
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +21,9 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 selected = entry == currentTab,
                 onClick = { onClick(entry) },
-                icon = { entry.icon },
+                icon = {
+                   Icon(imageVector = entry.icon, contentDescription = "bottom nav icon ${entry.name}")
+                       },
                 label = { Text(entry.name) }
             )
         }
@@ -32,5 +36,5 @@ enum class BottomNavigationItem(
 ) {
     Home(Icons.Default.Home, "home"),
     Search(Icons.Default.Search, "search"),
-    Profile(Icons.Default.Person, "Profile")
+    Favorite(Icons.Default.Favorite, "favorite")
 }

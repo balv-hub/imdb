@@ -5,8 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.balv.imdb.data.model.Genre
-import com.balv.imdb.data.model.GenreEntity
+import com.balv.imdb.data.model.entity.GenreEntity
 
 @Dao
 interface GenreDao {

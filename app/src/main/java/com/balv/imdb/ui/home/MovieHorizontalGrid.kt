@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.balv.imdb.domain.models.Movie
 import com.balv.imdb.ui.home.listview.MovieItem
+import com.balv.imdb.ui.icons.LoadingIndicator
+import com.balv.imdb.ui.icons.LottieLoadingIndicator
 
 @Composable
 fun SectionTitle(title: String) {
@@ -38,11 +40,9 @@ fun MovieHorizontalGrid(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Log.i("MovieHorizontalGrid", "MovieHorizontalGrid: $items")
-        println("MovieHorizontalGrid: ${items.value}")
         if (items.value.isEmpty()) {
             item {
-                CircularProgressIndicator(
+                LottieLoadingIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)

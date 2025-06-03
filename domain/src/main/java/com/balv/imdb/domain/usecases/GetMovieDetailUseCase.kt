@@ -1,6 +1,6 @@
 package com.balv.imdb.domain.usecases
 
-import com.balv.imdb.domain.models.Movie
+import android.util.Log
 import com.balv.imdb.domain.models.MovieDetail
 import com.balv.imdb.domain.repositories.IMovieRepository
 import kotlinx.coroutines.flow.Flow
@@ -13,9 +13,14 @@ class GetMovieDetailUseCase @Inject constructor(
 ) : BaseUseCase<Int, Flow<MovieDetail?>>(mMovieRepo) {
 
     override suspend fun execute(input: Int): Flow<MovieDetail?> {
-        val resultFlow = movieRepository.getMovieDetailLocal(input).onEach { local ->
+        val resultFlow = movieRepository.getMovieDetailLocalFlow(input).onEach { local ->
+            Log.i("TAG", "execute: oneachhhhh $local")
             if (local == null || System.currentTimeMillis() - local.refreshedDate > DETAIL_POLL_THRESHOLD) {
-                movieRepository.getDetailFromNetwork(input)
+                val network = movieRepository.getDetailFromNetwork(input)
+                Log.i("TAG", "execute: exec result $network")
+                if (network.isSuccess) {
+                    movieRepository.updateMovieDetail(network.data!!)
+                }
             }
         }
         return resultFlow

@@ -1,12 +1,10 @@
 package com.balv.imdb.data.network
 
-import com.balv.imdb.data.model.GenreList
-import com.balv.imdb.data.model.MovieData
-import com.balv.imdb.data.model.MovieDetailRemote
-import com.balv.imdb.data.model.RemoteMovie
-import com.balv.imdb.data.model.SearchData
-import io.reactivex.Observable
-import retrofit2.Call
+import com.balv.imdb.data.model.dto.GenreList
+import com.balv.imdb.data.model.dto.MovieCreditsResponseRemote
+import com.balv.imdb.data.model.dto.MovieDetailRemote
+import com.balv.imdb.data.model.dto.SearchData
+import com.balv.imdb.domain.models.MovieCredits
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -51,4 +49,9 @@ interface ApiService {
     suspend fun getMovieGenreList(
         @Query("language") language: String="en"
     ): GenreList
+
+    @GET("movie/{movie_id}/credits")
+    suspend fun getMovieCredits(
+        @Path("movie_id") movieId:Int
+    ): MovieCreditsResponseRemote
 }

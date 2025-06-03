@@ -9,9 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.balv.imdb.domain.models.Movie
 import com.balv.imdb.domain.models.MovieDetail
 import com.balv.imdb.domain.usecases.GetGenresResultUseCase
+import com.balv.imdb.domain.usecases.GetMovieCreditUseCase
 import com.balv.imdb.domain.usecases.GetMovieDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import javax.inject.Inject
 class MovieDetailViewModel @Inject constructor(
     private val getMovieDetailUseCase: GetMovieDetailUseCase,
     private val getGenresUseCase: GetGenresResultUseCase,
+    private val getCreditUseCase: GetMovieCreditUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val disposable = CompositeDisposable()
@@ -39,11 +42,13 @@ class MovieDetailViewModel @Inject constructor(
         Log.i(TAG, "movieId:  $movieId")
         movieId?.let {
             if (it != 0 && it != -1) {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     getMovieDetail(it).collectLatest { mv ->
-                        Log.i(TAG, "viewmodel collected detail : $mv")
                         _loadingLiveData.postValue(false)
                         _getMovieData.postValue(mv)
+                        if (mv != null && mv.castMembers.isEmpty()) {
+                            getCreditUseCase.execute(it)
+                        }
                     }
                 }
             } else {

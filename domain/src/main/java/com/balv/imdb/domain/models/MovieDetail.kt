@@ -25,7 +25,7 @@ data class MovieDetail(
     val releaseDate: String, // Or java.time.LocalDate if you parse it
     val releaseYear: String, // Derived for convenience
     val runtime: Int, // In minutes
-    val voteAverage: Double?, // e.g., 7.8
+    val voteAverage: Double, // e.g., 7.8
     val voteCount: Int?,
     val genres: List<DomainGenre>,
     val adult: Boolean,
@@ -51,7 +51,9 @@ data class MovieDetail(
 
     val spokenLanguageNames: List<String>,
     val originCountryNames: List<String>,
-    val refreshedDate: Long = 0
+    val refreshedDate: Long = 0,
+    val castMembers: List<DomainCastMember>,
+    val crewMembers: List<DomainCrewMember>,
 )
 
 // Simplified Collection for the domain layer
@@ -60,4 +62,25 @@ data class DomainCollection(
     val name: String,
     val posterPath: String?,
     val backdropPath: String?
+)
+
+data class MovieCredits(
+    val movieId: Int,
+    val cast: List<DomainCastMember>,
+    val crew: List<DomainCrewMember> // Or just the ones you care about, e.g., director
+)
+
+data class DomainCastMember(
+    val personId: Int,
+    val name: String,
+    val character: String,
+    val profilePath: String?,
+)
+
+data class DomainCrewMember(
+    val personId: Int, // Crew member's unique ID
+    val name: String,
+    val profilePath: String?, // Relative path
+    val job: String,
+    val department: String
 )

@@ -8,8 +8,15 @@ import javax.inject.Inject
 
 class GetMovieListUseCase @Inject constructor(
     mMovieRepo: IMovieRepository
-) : BaseUseCase<Unit, Flow<PagingData<Movie>>>(mMovieRepo) {
-    override suspend fun execute(input: Unit): Flow<PagingData<Movie>> {
+) : BaseUseCase<GetMovieListInput, Flow<PagingData<Movie>>>(mMovieRepo) {
+    override suspend fun execute(input: GetMovieListInput): Flow<PagingData<Movie>> {
+        if (input.forceRefresh) {
+            movieRepository.getNextRemoteDataPage(1)
+        }
         return movieRepository.allMoviesPaging()
     }
 }
+
+data class GetMovieListInput(
+    val forceRefresh: Boolean
+)

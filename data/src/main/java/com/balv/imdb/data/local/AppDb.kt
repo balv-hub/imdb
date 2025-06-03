@@ -6,17 +6,17 @@ import androidx.room.TypeConverters
 import com.balv.imdb.data.local.dao.GenreDao
 import com.balv.imdb.data.local.dao.MovieDao
 import com.balv.imdb.data.local.dao.MovieDetailDao
-import com.balv.imdb.data.model.GenreEntity
-import com.balv.imdb.data.model.ListStringConverter
-import com.balv.imdb.data.model.MovieDetailEntity
-import com.balv.imdb.data.model.MovieEntity
-import com.balv.imdb.data.model.MovieTypeConverter
-import com.balv.imdb.data.model.ProductionCompanyListConverter
-import com.balv.imdb.data.model.ProductionCountryListConverter
-import com.balv.imdb.data.model.SpokenLanguageListConverter
+import com.balv.imdb.data.model.entity.GenreEntity
+import com.balv.imdb.data.model.entity.ListStringConverter
+import com.balv.imdb.data.model.entity.MovieDetailEntity
+import com.balv.imdb.data.model.entity.MovieEntity
+import com.balv.imdb.data.model.entity.MovieTypeConverter
+import com.balv.imdb.data.model.entity.ProductionCompanyListConverter
+import com.balv.imdb.data.model.entity.ProductionCountryListConverter
+import com.balv.imdb.data.model.entity.SpokenLanguageListConverter
 
 
-@Database(entities = [MovieEntity::class,GenreEntity::class, MovieDetailEntity::class], version = 1)
+@Database(entities = [MovieEntity::class, GenreEntity::class, MovieDetailEntity::class], version = 1)
 @TypeConverters(
     MovieTypeConverter::class,
     ListStringConverter::class,

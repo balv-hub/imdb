@@ -1,4 +1,4 @@
-package com.balv.imdb.data.model
+package com.balv.imdb.data.model.dto
 
 import com.google.gson.annotations.SerializedName
 

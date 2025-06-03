@@ -6,9 +6,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
-import com.balv.imdb.data.model.MovieEntity
+import com.balv.imdb.data.model.entity.MovieEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

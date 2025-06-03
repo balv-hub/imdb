@@ -1,23 +1,31 @@
 package com.balv.imdb.data.mapper
 
-import com.balv.imdb.data.model.BelongsToCollectionRemote
-import com.balv.imdb.data.model.Genre
-import com.balv.imdb.data.model.GenreEntity
-import com.balv.imdb.data.model.GenreLocal
-import com.balv.imdb.data.model.GenreRemote
-import com.balv.imdb.data.model.MovieDetailEntity
-import com.balv.imdb.data.model.MovieDetailRemote
-import com.balv.imdb.data.model.MovieEntity
-import com.balv.imdb.data.model.ProductionCompanyLocal
-import com.balv.imdb.data.model.ProductionCompanyRemote
-import com.balv.imdb.data.model.ProductionCountryLocal
-import com.balv.imdb.data.model.ProductionCountryRemote
-import com.balv.imdb.data.model.RemoteMovie
-import com.balv.imdb.data.model.SpokenLanguageLocal
-import com.balv.imdb.data.model.SpokenLanguageRemote
+import com.balv.imdb.data.model.dto.BelongsToCollectionRemote
+import com.balv.imdb.data.model.dto.CastMemberRemote
+import com.balv.imdb.data.model.dto.CrewMemberRemote
+import com.balv.imdb.data.model.dto.Genre
+import com.balv.imdb.data.model.entity.GenreEntity
+import com.balv.imdb.data.model.entity.GenreLocal
+import com.balv.imdb.data.model.dto.GenreRemote
+import com.balv.imdb.data.model.dto.MovieCreditsResponseRemote
+import com.balv.imdb.data.model.entity.MovieDetailEntity
+import com.balv.imdb.data.model.dto.MovieDetailRemote
+import com.balv.imdb.data.model.entity.MovieEntity
+import com.balv.imdb.data.model.entity.ProductionCompanyLocal
+import com.balv.imdb.data.model.dto.ProductionCompanyRemote
+import com.balv.imdb.data.model.entity.ProductionCountryLocal
+import com.balv.imdb.data.model.dto.ProductionCountryRemote
+import com.balv.imdb.data.model.dto.RemoteMovie
+import com.balv.imdb.data.model.entity.SpokenLanguageLocal
+import com.balv.imdb.data.model.dto.SpokenLanguageRemote
+import com.balv.imdb.data.model.entity.CastMemberLocal
+import com.balv.imdb.data.model.entity.CrewMemberLocal
+import com.balv.imdb.domain.models.DomainCastMember
 import com.balv.imdb.domain.models.DomainCollection
+import com.balv.imdb.domain.models.DomainCrewMember
 import com.balv.imdb.domain.models.DomainGenre
 import com.balv.imdb.domain.models.Movie
+import com.balv.imdb.domain.models.MovieCredits
 import com.balv.imdb.domain.models.MovieDetail
 
 
@@ -74,7 +82,7 @@ fun MovieDetailRemote.networkToDomain(): MovieDetail {
         releaseDate = this.releaseDate.orEmpty(),
         title = this.title.orEmpty(),
         video = this.video ?: false,
-        voteAverage = this.voteAverage,
+        voteAverage = this.voteAverage ?: 0.0,
         voteCount = this.voteCount,
         refreshedDate = System.currentTimeMillis(),
         tagline = this.tagline,
@@ -90,7 +98,8 @@ fun MovieDetailRemote.networkToDomain(): MovieDetail {
         spokenLanguageNames = this.spokenLanguages?.map { it.name.orEmpty() } ?: emptyList(),
         originCountryNames = this.originCountry?.map { it } ?: emptyList(),
         formattedRuntime = formatRuntime(this.runtime ?: 0),
-    )
+        crewMembers = emptyList(),
+        castMembers = emptyList())
 }
 
 fun BelongsToCollectionRemote.toDomain() = DomainCollection(
@@ -103,22 +112,20 @@ fun BelongsToCollectionRemote.toDomain() = DomainCollection(
 fun Genre.remoteGenreToEntity() = GenreEntity(
     id = this.id, name = this.name
 )
+
 fun Genre.toDomain() = DomainGenre(
     id = this.id, name = this.name
 )
 
 fun GenreRemote.toDomain() = DomainGenre(
-    id = this.id?: 0 , name = this.name.orEmpty()
+    id = this.id ?: 0, name = this.name.orEmpty()
 )
 
 
-
-fun MovieDetailRemote.toEntity(): MovieDetailEntity? {
-    // The movie ID from the remote source is crucial. If it's null, we can't create a valid entity.
-    if (this.id == null) return null
+fun MovieDetailRemote.toEntity(): MovieDetailEntity {
 
     return MovieDetailEntity(
-        id = this.id, // Non-nullable
+        id = this.id!!,
         adult = this.adult ?: false,
         backdropPath = this.backdropPath,
         collectionId = this.belongsToCollection?.id,
@@ -228,7 +235,8 @@ fun MovieDetailEntity.toDomain(): MovieDetail {
 
     val productionCompanyNames: List<String> = this.productionCompanies.map { it.name }
 
-    val spokenLanguageNames: List<String> = this.spokenLanguages.mapNotNull { it.englishName.takeIf { name -> name.isNotBlank() } }
+    val spokenLanguageNames: List<String> =
+        this.spokenLanguages.mapNotNull { it.englishName.takeIf { name -> name.isNotBlank() } }
 
 
     return MovieDetail(
@@ -243,7 +251,7 @@ fun MovieDetailEntity.toDomain(): MovieDetail {
         releaseYear = extractReleaseYear(this.releaseDate),
         runtime = this.runtime,
         formattedRuntime = formatRuntime(this.runtime),
-        voteAverage = this.voteAverage,
+        voteAverage = this.voteAverage.toDouble(),
         voteCount = this.voteCount,
         genres = domainGenres,
         adult = this.adult,
@@ -259,7 +267,117 @@ fun MovieDetailEntity.toDomain(): MovieDetail {
         originCountryNames = this.originCountryList,
         popularity = this.popularity,
         video = this.video,
-        refreshedDate = this.lastRefreshed
+        refreshedDate = this.lastRefreshed,
+        crewMembers = this.crewMemberList?.map { it.toDomain() } ?: emptyList(),
+        castMembers = this.castMemberList?.map { it.toDomain() } ?: emptyList())
+}
+
+fun CrewMemberLocal.toDomain() = DomainCrewMember(
+    personId = this.personId,
+    name = this.name,
+    profilePath = this.profilePath,
+    job = this.job,
+    department = this.department,
+)
+
+fun CastMemberLocal.toDomain(): DomainCastMember {
+    return DomainCastMember(
+        personId = this.personId,
+        name = this.name.trim(), // Trim whitespace
+        character = this.character.trim(),
+        profilePath = this.profilePath,
     )
 }
+
+fun CrewMemberRemote.toDomain(): DomainCrewMember? {
+    // Essential fields for a crew member
+    if (this.personId == null || this.name == null || this.job == null || this.department == null) {
+        return null
+    }
+    return DomainCrewMember(
+        personId = this.personId,
+        name = this.name.trim(),
+        profilePath = this.profilePath,
+        job = this.job.trim(),
+        department = this.department.trim()
+    )
+}
+
+fun CastMemberRemote.toDomain() = DomainCastMember(
+    personId = this.personId ?: 0,
+    name = this.name.orEmpty(),
+    character = this.character.orEmpty(),
+    profilePath = this.profilePath
+)
+
+fun MovieCreditsResponseRemote.toDomain(): MovieCredits {
+
+    val domainCastList = this.cast?.map { it.toDomain() } ?: emptyList()
+
+    val domainCrewList = this.crew?.mapNotNull { it.toDomain() }
+     ?.filter { it.department == "Directing" && it.job == "Director" }
+        ?: emptyList()
+
+    return MovieCredits(
+        movieId = this.movieId ?: 0, cast = domainCastList, crew = domainCrewList
+    )
+}
+
+fun MovieDetail.toEntity() = MovieDetailEntity(
+    id = this.id,
+    adult = this.adult,
+    backdropPath = this.backdropPath,
+    collectionId = this.collection?.id,
+    collectionName = this.collection?.name,
+    collectionPosterPath = this.collection?.posterPath,
+    collectionBackdropPath = this.collection?.backdropPath,
+    budget = this.budget,
+    genres = this.genres.map { it.toLocal() }, // Map List<DomainGenre> to List<GenreLocal>
+    homepage = this.homepage,
+    imdbId = this.imdbId,
+    originCountryList = this.originCountryNames, // Assuming Domain model has originCountryCodes
+    originalLanguage = this.originalLanguage,
+    originalTitle = this.originalTitle,
+    overview = this.overview,
+    popularity = this.popularity ,
+    posterPath = this.posterPath,
+    productionCompanies = emptyList(),
+    productionCountries = emptyList(),
+    releaseDate = this.releaseDate,
+    revenue = this.revenue,
+    runtime = this.runtime,
+    spokenLanguages = emptyList(),
+    status = this.status,
+    tagline = this.tagline,
+    title = this.title,
+    video = this.video,
+    voteAverage = this.voteAverage,
+    voteCount = this.voteCount ?: 0,
+    lastRefreshed = refreshedDate, // Use provided or current time
+    castMemberList = this.castMembers.map { it.toLocal() }, // Map List<DomainCastMember> to List<CastMemberLocal>
+    crewMemberList = this.crewMembers.map { it.toLocal() }   // Map List<DomainCrewMember> to List<CrewMemberLocal>
+)
+
+fun DomainGenre.toLocal() = GenreLocal(
+    id = this.id,
+    name = this.name
+)
+
+fun DomainCastMember.toLocal() = CastMemberLocal(
+    personId = this.personId,
+    name = this.name,
+    character = this.character,
+    profilePath = this.profilePath,
+)
+
+fun DomainCrewMember.toLocal() = CrewMemberLocal(
+    personId = this.personId,
+    name = this.name,
+    profilePath = this.profilePath,
+    department = this.department,
+    job = this.job,
+)
+
+
+
 

@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +62,7 @@ import com.balv.imdb.R
 import com.balv.imdb.domain.models.MovieDetail
 import com.balv.imdb.ui.home.listview.tmdbRootPosterPath
 import com.balv.imdb.ui.icons.ErrorOutlined
+import com.balv.imdb.ui.icons.LoadingIndicator
 import com.balv.imdb.ui.icons.SentimentVeryDissatisfied
 
 const val tmdbRootBackDropPath = "https://image.tmdb.org/t/p/w500"
@@ -144,6 +146,10 @@ fun FullMovieDetailContent(
 
             DetailsSection(movie)
 
+            CastSection(movie.castMembers)
+
+            CrewSection(movie.crewMembers)
+
 
             Spacer(modifier = Modifier.height(16.dp)) // Padding at the bottom
         }
@@ -213,7 +219,6 @@ fun MovieDetailTopBar(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
-        // Potentially add share/more icons here
     }
 }
 
@@ -228,8 +233,8 @@ fun MovieDetailHeader(
     Box(modifier = modifier) {
         AsyncImage(
             model = tmdbRootBackDropPath + movie.backdropPath,
-            placeholder = painterResource(id = R.drawable.ic_launcher_background), // Replace with actual placeholder
-            error = painterResource(id = R.drawable.ic_launcher_background), // Replace
+            placeholder = painterResource(id = R.drawable.tmvdb_bg), // Replace with actual placeholder
+            error = painterResource(id = R.drawable.tmvdb_bg), // Replace
             contentDescription = "Movie Backdrop",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -283,7 +288,6 @@ fun MovieDetailHeader(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Title, Tagline, Quick Info, Score, Genres
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Bottom // Align items to bottom of this column
@@ -296,17 +300,29 @@ fun MovieDetailHeader(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        InfoChip(text = movie.releaseDate)
-                        InfoChip(
-                            text = movie.voteAverage.toString(),
-                            modifier = Modifier.padding(start = 4.dp)
+                    if (!movie.tagline.isNullOrBlank()) { // Check if tagline exists and is not just whitespace
+                        Spacer(modifier = Modifier.height(4.dp)) // Small space above tagline
+                        Text(
+                            text = movie.tagline!!,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic), // Example style
+                            color = Color.White.copy(alpha = 0.85f), // Slightly less prominent than title
+                            maxLines = 2, // Allow tagline to wrap up to 2 lines
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val displayYear = remember(movie.releaseDate) {
+                            movie.releaseDate.split("-").firstOrNull()?.takeIf { it.length == 4 } ?: "N/A"
+                        }
+                        InfoChip(text = displayYear)
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        UserScoreIndicator(score = ((movie.voteAverage ?: 0f)).toFloat())
+                        UserScoreIndicator(score = movie.voteAverage.toFloat())
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "User Score",
@@ -342,7 +358,7 @@ fun InfoChip(text: String, modifier: Modifier = Modifier) {
 fun UserScoreIndicator(score: Float, modifier: Modifier = Modifier) {
     Box(modifier.size(36.dp), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
-            progress = { score / 10f }, // progress is 0.0 to 1.0
+            progress = { score / 10f },
             modifier = Modifier.fillMaxSize(),
             color = if (score >= 7) Color(0xFF4CAF50) else if (score >= 4) Color(0xFFFFC107) else Color(
                 0xFFF44336
@@ -358,7 +374,6 @@ fun UserScoreIndicator(score: Float, modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GenreChips(genres: List<String>) {
     FlowRow(
@@ -444,134 +459,5 @@ fun DetailItem(label: String, value: String) {
             )
             Text(value, style = MaterialTheme.typography.bodyMedium, color = Color.LightGray)
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MovieNotFoundMessage(modifier: Modifier = Modifier, onBackClicked: () -> Unit) {
-    Scaffold( // Optional: Use Scaffold for a top app bar with a back button
-        topBar = {
-            TopAppBar(
-                title = { Text("Movie Not Found") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClicked) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues) // Apply padding from Scaffold
-                .padding(16.dp), // Additional padding for content
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                // Choose an icon that fits the "not found" or "oops" theme
-                imageVector = SentimentVeryDissatisfied, // Or Icons.Filled.BrokenImage, Icons.Filled.MovieFilter (with a slash through it if you had one)
-                contentDescription = "Movie not found icon",
-                modifier = Modifier.size(128.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Oops! We couldn't find that movie.",
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "It might have been removed, or the ID is incorrect. Please try searching again or go back.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(onClick = onBackClicked) {
-                Text("Go Back")
-            }
-        }
-    }
-}
-
-@Composable
-fun ErrorDisplay(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = ErrorOutlined,
-            contentDescription = "Error Icon",
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Something went wrong!",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.error
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onRetry) {
-            Text("Retry")
-        }
-    }
-}
-
-@Composable
-fun LoadingIndicator() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-}
-
-private fun formatUsdShort(value: Long): String {
-    if (value <= 0) return "N/A"
-
-    return when {
-        value >= 1_000_000_000 -> { // Billions
-            val billions = value / 1_000_000_000.0
-            if (billions % 1 == 0.0) {
-                "$${billions.toLong()}B"
-            } else {
-                "$${String.format("%.1f", billions)}B"
-            }
-        }
-
-        value >= 1_000_000 -> { // Millions
-            val millions = value / 1_000_000.0
-            if (millions % 1 == 0.0) {
-                "$${millions.toLong()}M"
-            } else {
-                "$${String.format("%.1f", millions)}M"
-            }
-        }
-
-        value >= 1_000 -> { // Thousands
-            val thousands = value / 1_000.0
-            if (thousands % 1 == 0.0) {
-                "$${thousands.toLong()}K"
-            } else {
-                "$${String.format("%.1f", thousands)}K"
-            }
-        }
-
-        else -> "$$value" // Less than 1000
     }
 }
