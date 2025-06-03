@@ -3,14 +3,19 @@ package com.balv.imdb.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,9 +23,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -81,14 +89,20 @@ fun MyAppNavHost() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Root(
     navigate: (String) -> Unit
 ) {
-    var currentTab by rememberSaveable {
-        mutableStateOf(BottomNavigationItem.Home)
-    }
+
+    val tabList = listOf(
+        BottomNavigationItem.Home,
+        BottomNavigationItem.Search,
+        BottomNavigationItem.Favorite
+    )
+
+    var currentTab by remember { mutableStateOf(BottomNavigationItem.Home) }
+    var previousTab by remember { mutableStateOf(currentTab) }
 
     Scaffold(
         containerColor = Color.Black,
@@ -96,22 +110,42 @@ fun Root(
             TopAppBar(title = { Text("The Movie DB") })
         },
         bottomBar = {
-            BottomNavigationBar(
-                currentTab
-            ) { tab ->
+            BottomNavigationBar(currentTab) { tab ->
+                previousTab = currentTab
                 currentTab = tab
             }
         }
     ) { paddingValues ->
-        when (currentTab) {
-            BottomNavigationItem.Home -> HomeScreen(paddingValues = paddingValues) {
-                navigate("detail/$it")
-            }
-            BottomNavigationItem.Search -> SearchScreen {
-                currentTab = BottomNavigationItem.Home
-            }
-            BottomNavigationItem.Favorite -> FavoriteScreen {
-                currentTab = BottomNavigationItem.Home
+        val currentIndex = tabList.indexOf(currentTab)
+        val previousIndex = tabList.indexOf(previousTab)
+
+        val direction = if (currentIndex > previousIndex) 1 else -1
+
+        AnimatedContent(
+            targetState = currentTab,
+            transitionSpec = {
+                slideInHorizontally(
+                    animationSpec = tween(300),
+                    initialOffsetX = { fullWidth -> fullWidth * direction }
+                ) togetherWith  slideOutHorizontally(
+                    animationSpec = tween(300),
+                    targetOffsetX = { fullWidth -> -fullWidth * direction }
+                )
+            },
+            modifier = Modifier.padding(paddingValues)
+        ) { targetTab ->
+            when (targetTab) {
+                BottomNavigationItem.Home -> HomeScreen(paddingValues = PaddingValues(0.dp)) {
+                    navigate("detail/$it")
+                }
+
+                BottomNavigationItem.Search -> SearchScreen {
+                    currentTab = BottomNavigationItem.Home
+                }
+
+                BottomNavigationItem.Favorite -> FavoriteScreen {
+                    currentTab = BottomNavigationItem.Home
+                }
             }
         }
     }

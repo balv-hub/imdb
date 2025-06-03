@@ -36,3 +36,4 @@
   * Genre list: GENRE_POLL_THRESHOLD = 1 minute
 - Pull to refresh is implemented for the main movie list screen, allowing users to manually refresh data.
 
+## Time spent: probably around 4 day
