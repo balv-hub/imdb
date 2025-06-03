@@ -404,9 +404,9 @@ fun ActionButtonsRow(
 @Composable
 fun OverviewSection(overview: String) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text("Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.LightGray)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(overview, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp)
+        Text(overview, style = MaterialTheme.typography.bodyMedium, lineHeight = 20.sp, color = Color.LightGray)
     }
 }
 
@@ -421,7 +421,7 @@ fun DetailsSection(details: MovieDetail) {
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text("Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.LightGray)
         Spacer(modifier = Modifier.height(8.dp))
         DetailItem("Original Title:", details.originalTitle)
         DetailItem("Status:", details.status)
@@ -439,9 +439,10 @@ fun DetailItem(label: String, value: String) {
                 label,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = Color.LightGray,
                 modifier = Modifier.width(120.dp)
             )
-            Text(value, style = MaterialTheme.typography.bodyMedium)
+            Text(value, style = MaterialTheme.typography.bodyMedium, color = Color.LightGray)
         }
     }
 }
